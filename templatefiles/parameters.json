@@ -1,0 +1,15 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccounts_a04c29e7e3394546bdca_name": {
+            "value": null
+        },
+        "sites_fabrikam_functions_20190909204519686_name": {
+            "value": null
+        },
+        "serverfarms_6e64ab540d314869a9b939eafefa3546_name": {
+            "value": null
+        }
+    }
+}

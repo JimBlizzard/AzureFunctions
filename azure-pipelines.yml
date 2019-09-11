@@ -1,0 +1,52 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  # the name of the service connection that you created above
+  serviceConnectionToAzure: connection-to-java-functions-group
+  # the name of your web app here is the same one you used above
+  # when you created the web app using the Azure CLI
+  appName: fabrikam-functions-20190909204519686
+  # The appFolderName variable allows the app to be anywhere in the folder structrure. 
+  # Just have to let Maven know where it is.  
+  appFolderName: fabFunctionsApp
+steps:
+- task: Maven@3
+  inputs:
+    mavenPomFile: $(appFolderName)/pom.xml
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'package'
+
+# to deploy to your app service
+- task: CopyFiles@2
+  displayName: Copy Files
+  inputs:
+    SourceFolder: $(system.defaultworkingdirectory)/$(appFolderName)/target/azure-functions/
+    Contents: '**'
+    TargetFolder: $(build.artifactstagingdirectory)   
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Artifact
+  inputs:
+    PathtoPublish: $(build.artifactstagingdirectory)    
+
+- task: AzureFunctionApp@1
+  displayName: Azure Function App deploy
+  inputs:
+    azureSubscription: $(serviceConnectionToAzure)
+    appType: functionApp
+    appName: $(appName)
+    package: $(build.artifactstagingdirectory)/$(appName)
